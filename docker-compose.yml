@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: icm-db
+    environment:
+      POSTGRES_USER: icm
+      POSTGRES_PASSWORD: icm
+      POSTGRES_DB: icm
+    ports:
+      - "5544:5432"
+    volumes:
+      - icm-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U icm -d icm"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./api
+    container_name: icm-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://icm:icm@db:5432/icm
+      SEED_ON_START: "true"
+      RANDOM_SEED: "42"
+    ports:
+      - "8080:8080"
+    command: >
+      sh -c "python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8080"
+
+volumes:
+  icm-pgdata:
