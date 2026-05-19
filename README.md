@@ -50,6 +50,8 @@ End-to-end, you get:
 9. [Troubleshooting](#9-troubleshooting)
 10. [License](#10-license)
 
+**Architecture:** [Agent planning & data joins](docs/PLANNING.md) — how multi-step MCP tool use maps to tables and SQL joins.
+
 ---
 
 ## 1. Prerequisites
@@ -390,6 +392,7 @@ sales-incentive-demo/
 ├── README.md
 ├── LICENSE                     # MIT
 └── docs/
+    ├── PLANNING.md             # Agent multi-step planning vs API/data joins
     └── images/
         └── claude-cowork-mockup.png
 ```
