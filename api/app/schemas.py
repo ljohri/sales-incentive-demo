@@ -100,3 +100,25 @@ class TeamBenchmark(BaseModel):
     attainment_mean_pct: float
     top_performer: Optional[str]
     bottom_performer: Optional[str]
+
+
+class MonthlyEstimateIn(BaseModel):
+    sales_amount: float = Field(..., ge=0, description="Monthly sales in USD")
+    units_sold: int = Field(..., ge=0, description="Units sold in the month")
+
+
+class MonthlyTierLine(BaseModel):
+    bracket_label: str
+    amount_in_bracket: float
+    rate_pct: float
+    commission: float
+
+
+class MonthlyEstimateOut(BaseModel):
+    sales_amount: float
+    units_sold: int
+    tier_lines: List[MonthlyTierLine]
+    tiered_commission: float
+    unit_bonus: float
+    total_payout: float
+    explanation: List[str]

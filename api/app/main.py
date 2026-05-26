@@ -1,13 +1,19 @@
 from datetime import datetime, date
+from pathlib import Path
 from typing import List, Optional
 
 from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import or_, and_, func
 from sqlalchemy.orm import Session
 
 from .db import get_db, engine, Base
 from . import models, schemas
 from .logic import compute_commission, median, percentile
+from .estimator import compute_monthly_commission
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 app = FastAPI(
     title="ICM Demo API",
@@ -20,10 +26,48 @@ app = FastAPI(
 
 Base.metadata.create_all(engine)
 
+if STATIC_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 
 @app.get("/healthz")
 def healthz():
     return {"status": "ok", "ts": datetime.utcnow().isoformat()}
+
+
+@app.get("/")
+def estimator_page():
+    """Rep-facing monthly commission estimator."""
+    index = STATIC_DIR / "index.html"
+    if not index.is_file():
+        raise HTTPException(404, "Estimator UI not found.")
+    return FileResponse(index)
+
+
+@app.post("/estimate/monthly", response_model=schemas.MonthlyEstimateOut)
+def estimate_monthly_commission(payload: schemas.MonthlyEstimateIn):
+    """Marginal tier commission on monthly sales + unit volume bonus."""
+    try:
+        result = compute_monthly_commission(payload.sales_amount, payload.units_sold)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return schemas.MonthlyEstimateOut(
+        sales_amount=result.sales_amount,
+        units_sold=result.units_sold,
+        tier_lines=[
+            schemas.MonthlyTierLine(
+                bracket_label=line.bracket_label,
+                amount_in_bracket=line.amount_in_bracket,
+                rate_pct=line.rate_pct,
+                commission=line.commission,
+            )
+            for line in result.tier_lines
+        ],
+        tiered_commission=result.tiered_commission,
+        unit_bonus=result.unit_bonus,
+        total_payout=result.total_payout,
+        explanation=result.explanation,
+    )
 
 
 def _resolve_rep(db: Session, rep: str) -> models.Rep:

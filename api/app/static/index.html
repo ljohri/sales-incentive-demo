@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monthly Commission Estimator</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header>
+      <p class="eyebrow">Sales Incentive Demo</p>
+      <h1>Monthly Commission Estimator</h1>
+      <p class="subtitle">
+        Enter your monthly sales and units sold. Commission uses
+        <strong>marginal tiers</strong>—each rate applies only to the portion of sales in that bracket.
+      </p>
+    </header>
+
+    <section class="card rate-card">
+      <h2>Rate table</h2>
+      <table class="rate-table">
+        <thead>
+          <tr><th>Sales range (monthly)</th><th>Commission %</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>$0 – $100,000</td><td>1%</td></tr>
+          <tr><td>$100,001 – $250,000</td><td>2%</td></tr>
+          <tr><td>Above $250,000</td><td>3%</td></tr>
+        </tbody>
+      </table>
+      <p class="hint">Unit bonus: <strong>$1,000</strong> when units sold &gt; 50.</p>
+    </section>
+
+    <section class="card form-card">
+      <form id="estimate-form">
+        <div class="field">
+          <label for="sales_amount">Monthly sales ($)</label>
+          <input
+            type="number"
+            id="sales_amount"
+            name="sales_amount"
+            min="0"
+            step="1000"
+            value="150000"
+            required
+          />
+        </div>
+        <div class="field">
+          <label for="units_sold">Units sold</label>
+          <input
+            type="number"
+            id="units_sold"
+            name="units_sold"
+            min="0"
+            step="1"
+            value="40"
+            required
+          />
+        </div>
+        <button type="submit" class="primary">Calculate commission</button>
+      </form>
+      <p id="error" class="error" hidden></p>
+    </section>
+
+    <section id="results" class="card results-card" hidden>
+      <h2>Your estimate</h2>
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>Bracket</th>
+            <th>Amount in bracket</th>
+            <th>Rate</th>
+            <th>Commission</th>
+          </tr>
+        </thead>
+        <tbody id="tier-rows"></tbody>
+        <tfoot>
+          <tr class="subtotal">
+            <td colspan="3">Tiered commission</td>
+            <td id="tiered-total"></td>
+          </tr>
+          <tr>
+            <td colspan="3">Unit volume bonus</td>
+            <td id="unit-bonus"></td>
+          </tr>
+          <tr class="total">
+            <td colspan="3">Total estimated payout</td>
+            <td id="total-payout"></td>
+          </tr>
+        </tfoot>
+      </table>
+      <ul id="explanation" class="explanation"></ul>
+    </section>
+
+    <footer>
+      <p>
+        Quarterly ICM data &amp; Claude co-worker:
+        <a href="/docs">API docs</a> ·
+        see <code>README.md</code> in the repo.
+      </p>
+    </footer>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

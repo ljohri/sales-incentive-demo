@@ -34,6 +34,9 @@ End-to-end, you get:
 - A **`CLAUDE.md` skill file** that turns Claude into the *Sales Incentive
   Co-worker* agent shown above — encoding the comp formula, when to fan out tool
   calls, how to investigate disputes, and how to format output.
+- A **monthly commission estimator** web app at **`http://localhost:8080/`** —
+  reps enter sales volume and units sold; the system applies a **marginal tier
+  rate table** plus a unit-volume bonus (see [Product spec](docs/PRODUCT_SPEC.md)).
 
 ---
 
@@ -51,6 +54,8 @@ End-to-end, you get:
 10. [License](#10-license)
 
 **Architecture:** [Agent planning & data joins](docs/PLANNING.md) — how multi-step MCP tool use maps to tables and SQL joins.
+
+**Product docs:** [Requirements](docs/REQUIREMENTS.md) · [Product spec](docs/PRODUCT_SPEC.md) · [Build plan](docs/BUILD_PLAN.md)
 
 ---
 
@@ -110,6 +115,11 @@ Invoke-RestMethod 'http://localhost:8080/reps?role=AE' | ConvertTo-Json -Depth 3
 ```
 
 Or just open the interactive Swagger UI: <http://localhost:8080/docs>.
+
+**Monthly commission estimator (rep UI):** open <http://localhost:8080/> in a browser.
+Enter monthly sales and units sold — tiered commission is computed with marginal
+rates (1% / 2% / 3%) plus a **$1,000 bonus** when units sold &gt; 50. To change
+rates, edit `api/app/estimator.py` and rebuild: `docker compose up --build -d api`.
 
 ### Step 2 — Install the MCP server
 
@@ -301,6 +311,8 @@ The FastAPI app self-documents at <http://localhost:8080/docs>. Quick reference:
 
 | Method | Path                              | Purpose                                  |
 |--------|-----------------------------------|------------------------------------------|
+| GET    | `/`                               | Monthly commission estimator (web UI)    |
+| POST   | `/estimate/monthly`               | Marginal tier estimate + unit bonus (JSON)|
 | GET    | `/healthz`                        | Liveness check                           |
 | GET    | `/reps`                           | List reps (filter by `role`, `region`)   |
 | GET    | `/reps/{rep}`                     | Resolve a rep by id, email, or name      |
@@ -384,7 +396,11 @@ sales-incentive-demo/
 │       ├── models.py           # Rep, IncentivePlan, Quota, Booking, Commission, Dispute
 │       ├── schemas.py          # Pydantic response shapes
 │       ├── logic.py            # Pure-function commission math + percentiles
+│       ├── estimator.py        # Monthly marginal tier table + unit bonus
+│       ├── static/             # Rep-facing estimator web UI
 │       └── seed.py             # 5-year synthetic history generator
+│   └── tests/
+│       └── test_estimator.py   # Acceptance tests for monthly estimator
 ├── mcp_server/
 │   ├── requirements.txt
 │   └── icm_mcp.py              # MCP server (stdio); 9 tools wrapping the REST API
@@ -392,6 +408,9 @@ sales-incentive-demo/
 ├── README.md
 ├── LICENSE                     # MIT
 └── docs/
+    ├── REQUIREMENTS.md         # Formal requirements (ICM + estimator)
+    ├── PRODUCT_SPEC.md         # Detailed product specification
+    ├── BUILD_PLAN.md           # Phased build / delivery plan
     ├── PLANNING.md             # Agent multi-step planning vs API/data joins
     └── images/
         └── claude-cowork-mockup.png
