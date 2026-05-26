@@ -55,7 +55,7 @@ End-to-end, you get:
 
 **Architecture:** [Agent planning & data joins](docs/PLANNING.md) — how multi-step MCP tool use maps to tables and SQL joins.
 
-**Product docs:** [Requirements](docs/REQUIREMENTS.md) · [Product spec](docs/PRODUCT_SPEC.md) · [Build plan](docs/BUILD_PLAN.md)
+**Product docs:** [Requirements](docs/REQUIREMENTS.md) · [Product spec](docs/PRODUCT_SPEC.md) · [Build plan](docs/BUILD_PLAN.md) · [Query catalog](docs/query_readme.md)
 
 ---
 
